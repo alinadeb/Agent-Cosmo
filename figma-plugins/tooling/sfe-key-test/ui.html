@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family: "Inter", -apple-system, sans-serif;
+        margin: 0;
+        padding: 12px;
+        font-size: 12px;
+        color: #242424;
+      }
+      h1 {
+        font-size: 13px;
+        margin: 0 0 4px;
+      }
+      .summary {
+        color: #616161;
+        margin-bottom: 10px;
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px solid #ededed;
+      }
+      .name {
+        font-weight: 600;
+        min-width: 150px;
+      }
+      .note {
+        color: #616161;
+        word-break: break-word;
+      }
+      .ok {
+        color: #0e700e;
+      }
+      .fail {
+        color: #b10e1c;
+      }
+      button {
+        margin-top: 12px;
+        padding: 6px 12px;
+        border: 1px solid #d1d1d1;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SFE key test</h1>
+    <div class="summary" id="summary">Importing…</div>
+    <ul id="list"></ul>
+    <button id="close">Close</button>
+    <script>
+      onmessage = (e) => {
+        const msg = e.data.pluginMessage;
+        if (!msg || msg.type !== "report") return;
+        document.getElementById("summary").textContent =
+          msg.okCount + " / " + msg.total + ' keys resolved in "' + msg.file + '"';
+        const list = document.getElementById("list");
+        list.innerHTML = "";
+        msg.results.forEach((r) => {
+          const li = document.createElement("li");
+          const icon = document.createElement("span");
+          icon.className = r.ok ? "ok" : "fail";
+          icon.textContent = r.ok ? "✓" : "✕";
+          const name = document.createElement("span");
+          name.className = "name";
+          name.textContent = r.name;
+          const note = document.createElement("span");
+          note.className = "note";
+          note.textContent = r.note;
+          li.appendChild(icon);
+          li.appendChild(name);
+          li.appendChild(note);
+          list.appendChild(li);
+        });
+      };
+      document.getElementById("close").onclick = () =>
+        parent.postMessage({ pluginMessage: { type: "close" } }, "*");
+    </script>
+  </body>
+</html>

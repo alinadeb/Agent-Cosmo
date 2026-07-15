@@ -1,0 +1,32 @@
+{
+  "id": "figma",
+  "displayName": "Figma MCP (for Cosmo)",
+  "description": "The only external MCP dependency Cosmo has. Reads (and optionally writes) frames, components, variables, and styles from a Figma library file. Cosmo prompts the user to connect this at session start (§ A.Startup handshake in cosmo.system-prompt.md).",
+  "transport": "stdio",
+  "commands": {
+    "figma-developer-mcp": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp"],
+      "env": { "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}" },
+      "notes": "Community read-focused MCP. Good for design ingestion and audits; may not support all write operations."
+    },
+    "custom": {
+      "command": "${FIGMA_MCP_COMMAND}",
+      "args": "${FIGMA_MCP_ARGS as CSV}",
+      "env": { "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}" },
+      "notes": "Replace with your Figma MCP binary of choice. Cosmo works with any stdio-transport MCP that exposes get_file / get_components / get_variables / get_styles."
+    }
+  },
+  "expectedTools": [
+    "get_file",
+    "get_components",
+    "get_variables",
+    "get_styles",
+    "get_node",
+    "get_text_content"
+  ],
+  "notes": [
+    "This file is documentation of what Cosmo expects. The runtime config lives in runtime/node/.env — not here.",
+    "Never commit a real FIGMA_ACCESS_TOKEN. Use env vars."
+  ]
+}

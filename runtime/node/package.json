@@ -1,0 +1,25 @@
+{
+  "name": "cosmo-agent",
+  "version": "1.0.0",
+  "description": "Cosmo — self-contained design-to-code agent. Reads its system prompt from cosmo.system-prompt.md and talks to Anthropic Claude with an optional Figma MCP client attached.",
+  "type": "module",
+  "private": true,
+  "main": "index.js",
+  "bin": {
+    "cosmo": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "doctor": "node index.js --doctor",
+    "test": "node test/smoke.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^16.4.5"
+  }
+}

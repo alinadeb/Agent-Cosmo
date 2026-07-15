@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meet Cosmo — From Prompt to Production UI</title>
+<style>
+  :root{
+    --ink:#1d1d20; --body:#3a3a42; --muted:#6e6e78; --faint:#9a9aa4;
+    --accent:#5b57d6; --accent-soft:#efeffb; --hair:#ececf0;
+    --card:#ffffff; --cardline:rgba(17,17,26,.07);
+    --shadow:0 1px 2px rgba(17,17,26,.04), 0 18px 40px -20px rgba(17,17,26,.18);
+    --code:#f6f6fb; --teal:#0f8f7e; --amber:#b26b00;
+  }
+  *{box-sizing:border-box}
+  @page{ size:Letter; margin:88px 44px 58px; }
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--body); background:#fff; font-size:16.5px; line-height:1.62;
+    -webkit-font-smoothing:antialiased; print-color-adjust:exact; -webkit-print-color-adjust:exact;
+  }
+  .nav{position:fixed; top:0; left:0; right:0; height:64px; background:#fff;
+    border-bottom:1px solid var(--hair); display:flex; align-items:center;
+    padding:0 44px; gap:26px; font-size:14px; overflow:hidden; white-space:nowrap;}
+  .nav .back{color:var(--muted); font-weight:500}
+  .nav a{color:var(--ink); text-decoration:none; font-weight:500}
+  .nav .sp{flex:0 0 auto}
+  .badge{position:fixed; right:34px; bottom:26px; background:#fff; color:var(--faint);
+    border:1px solid var(--hair); border-radius:999px; padding:7px 16px; font-size:12.5px;
+    font-weight:600; letter-spacing:.02em; box-shadow:var(--shadow)}
+  .wrap{max-width:730px; margin:0 auto}
+  .hero{border:1px solid var(--cardline); border-radius:26px; box-shadow:var(--shadow);
+    padding:64px 56px 60px; margin:6px 0 30px}
+  .hero h1{font-size:62px; line-height:1.04; letter-spacing:-.025em; color:var(--ink); font-weight:800; margin:0}
+  .hero .sub{margin-top:30px; font-size:14px; letter-spacing:.30em; color:var(--muted); font-weight:600}
+  .lead{font-size:20px; line-height:1.6; color:#2c2c33; margin:26px 2px 8px}
+  .lead b{color:var(--ink)}
+  .eyebrow{font-size:12.5px; letter-spacing:.34em; color:var(--accent); font-weight:700;
+    text-transform:uppercase; margin:52px 2px 12px}
+  h2{font-size:34px; line-height:1.1; letter-spacing:-.02em; color:var(--ink); font-weight:800; margin:0 0 14px}
+  h3{font-size:19px; color:var(--ink); font-weight:700; margin:26px 0 8px}
+  p{margin:0 2px 15px}
+  b,strong{color:#22222a}
+  code{font-family:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    font-size:.86em; color:var(--accent); background:var(--accent-soft); padding:.08em .38em; border-radius:6px}
+  .grid{display:grid; gap:16px; margin:8px 0 6px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  .card{border:1px solid var(--cardline); border-radius:20px; box-shadow:var(--shadow); padding:24px; background:var(--card)}
+  .card .k{display:block; font-size:17px; font-weight:750; color:var(--ink); margin-bottom:7px}
+  .card .s{display:block; font-size:15px; color:var(--muted); line-height:1.55}
+  .card .em{font-size:22px}
+  .steps{display:grid; grid-template-columns:1fr 1fr; gap:26px 34px; margin:12px 0}
+  .step .num{font-size:22px; font-weight:800; color:#d3d3e2}
+  .step h4{margin:2px 0 5px; font-size:17px; color:var(--ink); font-weight:750}
+  .step p{margin:0; font-size:14.5px; color:var(--muted)}
+  .diagram{border:1px solid var(--cardline); border-radius:22px; box-shadow:var(--shadow); padding:26px 24px; margin:14px 0 8px}
+  .flow{display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px}
+  .node{flex:1 1 20%; min-width:120px; border:1px solid var(--cardline); border-radius:14px; padding:14px; text-align:center; background:#fff}
+  .node .nk{display:block; font-weight:700; color:var(--ink); font-size:15px}
+  .node .ns{display:block; color:var(--muted); font-size:13px; margin-top:3px}
+  .arrow{align-self:center; color:var(--accent); font-size:20px; font-weight:700}
+  .chain{display:grid; align-items:stretch; gap:10px}
+  .chain.c4{grid-template-columns:1fr auto 1fr auto 1fr auto 1fr}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:15px}
+  th{text-align:left; text-transform:uppercase; letter-spacing:.08em; font-size:11.5px; color:var(--muted); font-weight:700; padding:0 14px 10px; border-bottom:1px solid var(--hair)}
+  td{padding:14px 14px; border-bottom:1px solid var(--hair); vertical-align:top}
+  td.x{color:var(--muted)} td.y{color:var(--ink); font-weight:600}
+  .call{border:1px solid var(--cardline); border-left:4px solid var(--accent); border-radius:14px; box-shadow:var(--shadow); padding:18px 22px; margin:16px 0; font-size:15px}
+  .call .t{display:block; font-weight:750; color:var(--ink); margin-bottom:4px}
+  .stats{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:12px 0}
+  .stat{border:1px solid var(--cardline); border-radius:20px; box-shadow:var(--shadow); padding:26px 22px; text-align:center}
+  .stat .big{font-size:28px; font-weight:800; color:var(--ink)}
+  .stat .cap{display:block; color:var(--muted); font-size:14px; margin-top:6px}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin:20px 0}
+  .chip{border:1px solid var(--cardline); color:var(--accent); border-radius:999px; padding:8px 16px; font-size:13.5px; font-weight:650}
+  .closing{font-size:19px; color:#2c2c33; margin:26px 2px}
+  .foot{color:var(--faint); font-size:13px; margin:34px 2px 8px; border-top:1px solid var(--hair); padding-top:16px}
+  /* No page-break control — content flows continuously to fill every page. */
+  /* Chromium rasterizes large soft box-shadows as hard gray blocks in PDF/print.
+     Swap to a light, print-safe shadow so cards don't get gray slabs behind them. */
+  @media print {
+    :root{ --shadow:none; }
+    .hero,.card,.diagram,.stat,.call,.badge{ box-shadow:none !important; }
+    .hero,.card,.diagram,.stat{ border-color:rgba(17,17,26,.14) !important; }
+  }
+</style>
+</head>
+<body>
+<div class="badge">Cosmo</div>
+
+<div class="wrap">
+
+  <div class="hero avoid">
+    <h1>Meet<br>Cosmo</h1>
+    <div class="sub">F R O M&nbsp;&nbsp;P R O M P T&nbsp;&nbsp;T O&nbsp;&nbsp;P R O D U C T I O N&nbsp;&nbsp;U I</div>
+  </div>
+
+  <p class="lead" id="i">You describe a screen. Cosmo turns it into a <b>real Figma design</b>, an
+  <b>accessibility &amp; Responsible-AI audit</b>, and <b>production-ready React</b> — using your
+  actual design system, not a screenshot and not a guess. You review and steer at every step.</p>
+
+  <!-- THE PROBLEM -->
+  <div class="eyebrow" id="pr">The problem</div>
+  <h2>Handoff eats the week</h2>
+  <p>The idea is the easy part. Turning it into something a PM can review, a designer can trust,
+  and an engineer can ship — accessibly — is where the days disappear. Four things go wrong again
+  and again:</p>
+  <div class="grid g2">
+    <div class="card avoid"><span class="k">The design-to-code gap</span><span class="s">A working idea has to be re-drawn in Figma, annotated for accessibility, and re-typed as code — by hand, three times over.</span></div>
+    <div class="card avoid"><span class="k">AI that guesses</span><span class="s">Generic code assistants invent component names, props, and tokens that don't exist in your system — so the output looks right and breaks on paste.</span></div>
+    <div class="card avoid"><span class="k">Accessibility, bolted on last</span><span class="s">Focus order, labels, and contrast get added at the end (if at all), so they slip — and fixing them late is expensive.</span></div>
+    <div class="card avoid"><span class="k">Drift from the system</span><span class="s">One-off components and hardcoded colours creep in instead of the real library, and the design language quietly erodes.</span></div>
+  </div>
+  <div class="call avoid"><span class="t">The through-line</span> Every one of these is a <b>trust</b> problem — you can't trust the
+  output enough to ship it without redoing the work. Cosmo is built to close that gap.</div>
+
+  <!-- MEET COSMO -->
+  <div class="eyebrow newpage" id="meet">The idea</div>
+  <h2>One agent, real components</h2>
+  <p>Cosmo is a VS Code agent that never works from memory. It reads your <b>real</b> components
+  from live sources, builds the design from genuine instances, checks it against accessibility and
+  content standards, and only then writes the code — pausing for your sign-off between each step.</p>
+  <div class="grid g3">
+    <div class="card avoid"><span class="k em">🧩</span><span class="k">Real, not guessed</span><span class="s">Components, props, and tokens come from live sources. If it can't verify something, it stops instead of inventing it.</span></div>
+    <div class="card avoid"><span class="k em">♿</span><span class="k">A11y from frame one</span><span class="s">WCAG 2.2 AA and Responsible-AI are applied while it designs and codes — not patched on at the end.</span></div>
+    <div class="card avoid"><span class="k em">🎛️</span><span class="k">You stay in control</span><span class="s">A review gate after every phase. Approve, or tell it what to change — nothing ships silently.</span></div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="eyebrow" id="how">How it works</div>
+  <h2>Four steps, you approve each one</h2>
+  <div class="diagram avoid">
+    <div class="chain c4">
+      <div class="node"><span class="nk">Intake</span><span class="ns">idea → spec</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="nk">Design</span><span class="ns">build in Figma</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="nk">Audit</span><span class="ns">check standards</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="nk">Code</span><span class="ns">emit React</span></div>
+    </div>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="num">01</div><h4>Intake</h4><p>You give a prompt, a PRD, or a Figma link. Cosmo turns it into a clear spec and asks only the questions it actually needs.</p></div>
+    <div class="step"><div class="num">02</div><h4>Design</h4><p>It plans which real components to use, then builds the frames straight into your Figma file — editable instances, bound tokens, sample data.</p></div>
+    <div class="step"><div class="num">03</div><h4>Audit</h4><p>It reads the design back and returns a graded report: accessibility, content, Responsible AI, design language, component usage.</p></div>
+    <div class="step"><div class="num">04</div><h4>Code</h4><p>It writes React/TypeScript per component, mapped to verified APIs and your project's conventions — ready to review and paste.</p></div>
+  </div>
+
+  <!-- THE PLUGINS -->
+  <div class="eyebrow newpage" id="pl">Under the hood</div>
+  <h2>The plugins that make it real</h2>
+  <p>Figma can't be written to by an API call — the only way to author real component instances is
+  a Figma plugin. Cosmo uses three small ones, so the design is built from your true library
+  rather than redrawn look-alikes.</p>
+  <div class="grid g3">
+    <div class="card avoid"><span class="k">① key-extractor</span><span class="s">Runs once inside your published component library and exports a map of every component to its Figma key — the “what exists” list.</span></div>
+    <div class="card avoid"><span class="k">② key-test</span><span class="s">Runs in your working file and checks those keys actually resolve — catching an unpublished or mis-shared library before any real build.</span></div>
+    <div class="card avoid"><span class="k">③ build plugin</span><span class="s">Generated per design. It drops in real component instances, applies tokens and sample data, and rebuilds cleanly every run.</span></div>
+  </div>
+  <div class="call avoid"><span class="t">Why it matters to you</span> Because the design is assembled from genuine instances, what you
+  review in Figma is what the library really produces — and the code step maps to the same verified
+  components. No look-alikes, no surprises on paste.</div>
+
+  <!-- WHY IT HELPS -->
+  <div class="eyebrow" id="why">Why it helps</div>
+  <h2>From days of redraw to a reviewable draft</h2>
+  <table class="avoid">
+    <thead><tr><th>Before</th><th>With Cosmo</th></tr></thead>
+    <tbody>
+      <tr><td class="x">Re-draw every screen by hand in Figma</td><td class="y">Frames built from real instances, automatically</td></tr>
+      <tr><td class="x">Annotate accessibility at the end</td><td class="y">WCAG 2.2 AA applied from the first frame</td></tr>
+      <tr><td class="x">Guessed props break on paste</td><td class="y">Code mapped to verified component APIs</td></tr>
+      <tr><td class="x">Agent runs end-to-end, no control</td><td class="y">A review gate after every phase</td></tr>
+    </tbody>
+  </table>
+  <div class="stats">
+    <div class="stat"><div class="big">Real components</div><span class="cap">resolved from live sources, never from memory</span></div>
+    <div class="stat"><div class="big">A11y built in</div><span class="cap">WCAG 2.2 AA + Responsible AI, not bolted on</span></div>
+    <div class="stat"><div class="big">Handoff-ready</div><span class="cap">per-component React that follows your conventions</span></div>
+    <div class="stat"><div class="big">You steer</div><span class="cap">approve or redirect at every phase gate</span></div>
+  </div>
+
+  <p class="closing">Cosmo gives back the hours you'd spend re-drawing, re-annotating, and re-typing —
+  and hands you work you can actually trust: real components, accessibility included, reviewable
+  at every step.</p>
+
+  <div class="chips">
+    <span class="chip">Design-to-Code</span><span class="chip">Figma</span><span class="chip">React + TypeScript</span>
+    <span class="chip">Accessibility</span><span class="chip">Responsible AI</span><span class="chip">Copilot Agent</span>
+  </div>
+  <div class="foot">Cosmo · From prompt to production UI · 2026</div>
+
+</div>
+</body>
+</html>

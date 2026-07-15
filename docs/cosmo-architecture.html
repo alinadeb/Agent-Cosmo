@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cosmo — Design-to-Code Agent · Technical Architecture</title>
+<style>
+  :root{
+    --ink:#1d1d20; --body:#3a3a42; --muted:#6e6e78; --faint:#9a9aa4;
+    --accent:#5b57d6; --accent-soft:#efeffb; --hair:#ececf0;
+    --card:#ffffff; --cardline:rgba(17,17,26,.07);
+    --shadow:0 1px 2px rgba(17,17,26,.04), 0 18px 40px -20px rgba(17,17,26,.18);
+    --code:#f6f6fb; --teal:#0f8f7e; --amber:#b26b00;
+  }
+  *{box-sizing:border-box}
+  @page{ size:Letter; margin:88px 44px 58px; }
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--body); background:#fff; font-size:16.5px; line-height:1.62;
+    -webkit-font-smoothing:antialiased; print-color-adjust:exact; -webkit-print-color-adjust:exact;
+  }
+  /* fixed repeating top nav (renders in the @page top margin) */
+  .nav{position:fixed; top:0; left:0; right:0; height:64px; background:#fff;
+    border-bottom:1px solid var(--hair); display:flex; align-items:center;
+    padding:0 44px; gap:26px; font-size:14px; overflow:hidden; white-space:nowrap;}
+  .nav .back{color:var(--muted); font-weight:500}
+  .nav a{color:var(--ink); text-decoration:none; font-weight:500}
+  .nav .sp{flex:0 0 auto}
+  .badge{position:fixed; right:34px; bottom:26px; background:#fff; color:var(--faint);
+    border:1px solid var(--hair); border-radius:999px; padding:7px 16px; font-size:12.5px;
+    font-weight:600; letter-spacing:.02em; box-shadow:var(--shadow)}
+  .wrap{max-width:730px; margin:0 auto}
+  /* hero */
+  .hero{border:1px solid var(--cardline); border-radius:26px; box-shadow:var(--shadow);
+    padding:64px 56px 60px; margin:6px 0 30px}
+  .hero h1{font-size:62px; line-height:1.04; letter-spacing:-.025em; color:var(--ink);
+    font-weight:800; margin:0}
+  .hero .sub{margin-top:30px; font-size:14px; letter-spacing:.34em; color:var(--muted); font-weight:600}
+  .lead{font-size:20px; line-height:1.6; color:#2c2c33; margin:26px 2px 8px}
+  .lead b{color:var(--ink)}
+  /* section rhythm */
+  .eyebrow{font-size:12.5px; letter-spacing:.34em; color:var(--accent); font-weight:700;
+    text-transform:uppercase; margin:52px 2px 12px}
+  h2{font-size:34px; line-height:1.1; letter-spacing:-.02em; color:var(--ink); font-weight:800; margin:0 0 14px}
+  h3{font-size:19px; color:var(--ink); font-weight:700; margin:26px 0 8px}
+  p{margin:0 2px 15px}
+  .p{margin:0 2px 15px}
+  b,strong{color:#22222a}
+  a.link{color:var(--accent); text-decoration:none}
+  code{font-family:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    font-size:.86em; color:var(--accent); background:var(--accent-soft); padding:.08em .38em; border-radius:6px}
+  /* cards */
+  .grid{display:grid; gap:16px; margin:8px 0 6px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  .card{border:1px solid var(--cardline); border-radius:20px; box-shadow:var(--shadow);
+    padding:24px 24px; background:var(--card)}
+  .card .k{display:block; font-size:17px; font-weight:750; color:var(--ink); margin-bottom:7px}
+  .card .s{display:block; font-size:15px; color:var(--muted); line-height:1.55}
+  .card code{font-size:.82em}
+  .src .k{color:var(--accent)}
+  /* flow diagram */
+  .diagram{border:1px solid var(--cardline); border-radius:22px; box-shadow:var(--shadow);
+    padding:26px 24px; margin:14px 0 8px}
+  .flow{display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px}
+  .node{flex:1 1 30%; min-width:150px; border:1px solid var(--cardline); border-radius:14px;
+    padding:14px 14px; text-align:center; background:#fff}
+  .node.big{flex:1 1 100%}
+  .node.solid{background:var(--accent); border-color:var(--accent)}
+  .node.solid .nk,.node.solid .ns{color:#fff}
+  .node .nk{display:block; font-weight:700; color:var(--ink); font-size:15px}
+  .node .ns{display:block; color:var(--muted); font-size:13px; margin-top:3px}
+  .node .nk code{background:rgba(91,87,214,.12)}
+  .arrow{align-self:center; color:var(--accent); font-size:20px; font-weight:700; flex:0 0 auto}
+  .down{text-align:center; color:var(--accent); font-size:22px; margin:8px 0; font-weight:700}
+  .cap{display:block; text-align:center; color:var(--accent); font-size:13px; font-weight:600; margin:12px 0 2px}
+  .chain{display:grid; align-items:stretch; gap:10px}
+  .chain.c2{grid-template-columns:1fr auto 1fr}
+  .chain .arrow{align-self:center}
+  /* steps */
+  .steps{display:grid; grid-template-columns:1fr 1fr; gap:26px 34px; margin:12px 0}
+  .step .num{font-size:22px; font-weight:800; color:#d3d3e2}
+  .step h4{margin:2px 0 5px; font-size:17px; color:var(--ink); font-weight:750}
+  .step p{margin:0; font-size:14.5px; color:var(--muted)}
+  /* table */
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14.5px}
+  th{text-align:left; text-transform:uppercase; letter-spacing:.08em; font-size:11.5px;
+    color:var(--muted); font-weight:700; padding:0 14px 10px; border-bottom:1px solid var(--hair)}
+  td{padding:14px 14px; border-bottom:1px solid var(--hair); vertical-align:top; color:var(--body)}
+  td b{color:var(--ink)}
+  .tier{color:var(--accent); font-weight:700; font-size:13px}
+  /* code block */
+  pre{background:var(--code); border:1px solid var(--cardline); border-radius:14px;
+    padding:18px 20px; font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    font-size:13px; line-height:1.6; color:#2b2b34; overflow:hidden; margin:12px 0}
+  pre .c{color:var(--faint)} pre .s{color:var(--teal)} pre .k{color:var(--accent)} pre .f{color:#c2410c}
+  /* callout */
+  .call{border:1px solid var(--cardline); border-left:4px solid var(--accent); border-radius:14px;
+    box-shadow:var(--shadow); padding:18px 22px; margin:16px 0; font-size:15px}
+  .call .t{display:block; font-weight:750; color:var(--ink); margin-bottom:4px}
+  .call.warn{border-left-color:var(--amber)} .call.ok{border-left-color:var(--teal)}
+  /* stats */
+  .stats{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:12px 0}
+  .stat{border:1px solid var(--cardline); border-radius:20px; box-shadow:var(--shadow);
+    padding:26px 22px; text-align:center}
+  .stat .big{font-size:30px; font-weight:800; color:var(--ink)}
+  .stat .cap{display:block; color:var(--muted); font-size:14px; margin-top:6px; letter-spacing:0}
+  /* chips + footer */
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin:20px 0}
+  .chip{border:1px solid var(--cardline); color:var(--accent); border-radius:999px;
+    padding:8px 16px; font-size:13.5px; font-weight:650}
+  .closing{font-size:19px; color:#2c2c33; margin:26px 2px}
+  .foot{color:var(--faint); font-size:13px; margin:34px 2px 8px; border-top:1px solid var(--hair); padding-top:16px}
+  /* No page-break control — content flows continuously to fill every page. */
+  /* Chromium rasterizes large soft box-shadows as hard gray blocks in PDF/print.
+     Swap to a light, print-safe shadow so cards don't get gray slabs behind them. */
+  @media print {
+    :root{ --shadow:none; }
+    .hero,.card,.diagram,.stat,.call,.badge{ box-shadow:none !important; }
+    .hero,.card,.diagram,.stat{ border-color:rgba(17,17,26,.14) !important; }
+  }
+</style>
+</head>
+<body>
+<div class="badge">Cosmo</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero avoid">
+    <h1>Cosmo —<br>Design to<br>Code Agent</h1>
+    <div class="sub">T E C H N I C A L&nbsp;&nbsp;A R C H I T E C T U R E</div>
+  </div>
+
+  <p class="lead">A VS Code agent that turns a prompt, a PRD, or an existing Figma file into three
+  reviewable deliverables — a Figma design built from <b>real</b> components, a
+  <b>WCAG 2.2 AA + Responsible-AI</b> compliance audit, and production-ready
+  <b>React / TypeScript</b> — with a human review gate at every phase.</p>
+
+  <!-- 1 · OVERVIEW -->
+  <div class="eyebrow" id="o">What Cosmo produces</div>
+  <h2>Three deliverables, one flow</h2>
+  <p>Cosmo runs as a sequence of gated phases. Each phase produces one artifact and stops for
+  your approval before the next begins — nothing advances silently.</p>
+  <div class="grid g3">
+    <div class="card avoid"><span class="k">1 · Figma design</span><span class="s">Frames assembled from real design-system components, bound tokens, and layout patterns — authored straight into your file.</span></div>
+    <div class="card avoid"><span class="k">2 · Compliance audit</span><span class="s">A severity-graded report across accessibility, content design, RAI, design language, and component usage.</span></div>
+    <div class="card avoid"><span class="k">3 · React + TypeScript</span><span class="s">Per-component code mapped to verified component APIs, following your project's React conventions.</span></div>
+  </div>
+  <div class="call avoid"><span class="t">Core principle — never from memory</span>
+  Cosmo only uses components, props, tokens, and keys it can read from a live source. If it can't
+  verify something, it says so and stops — rather than inventing a component, prop, or token.</div>
+
+  <!-- 2 · ARCHITECTURE -->
+  <div class="eyebrow newpage" id="a">Architecture</div>
+  <h2>Three live sources</h2>
+  <p>Everything Cosmo knows about a component is resolved from three connected sources. Together
+  they answer <i>“what exists,” “how does it behave,”</i> and <i>“what's on the canvas.”</i></p>
+  <div class="diagram avoid">
+    <div class="flow">
+      <div class="node src"><span class="nk">① Key catalog</span><span class="ns"><code>component-keys.json</code> — identity + Figma key</span></div>
+      <div class="node src"><span class="nk">② Component-Docs MCP</span><span class="ns"><code>component-docs</code> — props, slots, tokens &amp; the code</span></div>
+      <div class="node src"><span class="nk">③ Figma Dev Mode MCP</span><span class="ns"><code>figma-desktop</code> — reads the live canvas</span></div>
+    </div>
+    <div class="down">↓</div>
+    <div class="flow"><div class="node big solid"><span class="nk">Cosmo agent</span><span class="ns">plans · verifies · generates — never inventing from memory</span></div></div>
+  </div>
+  <table class="avoid">
+    <thead><tr><th>Source</th><th>Provides</th><th>Why it's needed</th></tr></thead>
+    <tbody>
+      <tr><td><b>Key catalog</b><br><code>component-keys.json</code></td><td>Name → Figma <code>key</code> for every published component &amp; variant</td><td>The Dev Mode MCP can't enumerate the Assets panel. The catalog is the authoritative list of what exists and how to instantiate it.</td></tr>
+      <tr><td><b>Component-Docs MCP</b><br><code>component-docs</code></td><td>Props, slots, tokens, usage rules, and verified code examples</td><td>The behaviour authority — it makes the generated design variants and the React code correct instead of guessed.</td></tr>
+      <tr><td><b>Figma Dev Mode MCP</b><br><code>figma-desktop</code></td><td>Reads the canvas / selection (<code>get_metadata</code>, <code>get_screenshot</code>, <code>get_variable_defs</code>)</td><td>Lets Cosmo read a design back to audit it and confirm what was written. It does <b>not</b> author frames — a plugin does.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 3 · TWO TRACKS -->
+  <div class="eyebrow" id="t">The mental model</div>
+  <h2>Two engines, two tracks</h2>
+  <p>The single most important idea: <b>the design and the code are built by two different engines.</b>
+  A Figma plugin pipeline authors the design; the Component-Docs MCP generates the code.</p>
+  <div class="diagram avoid">
+    <div class="chain c2">
+      <div class="node"><span class="nk">Key catalog + Dev Mode</span><span class="ns">identity + canvas</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="nk">Build plugin</span><span class="ns"><code>importComponentByKeyAsync</code></span></div>
+    </div>
+    <div class="down">↓</div>
+    <div class="node big solid"><span class="nk">Figma design</span><span class="ns">real component instances</span></div>
+    <span class="cap">design track</span>
+    <div class="chain c2" style="margin-top:20px">
+      <div class="node"><span class="nk">Component-Docs MCP</span><span class="ns">verified APIs + examples</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="nk">Cosmo codegen</span><span class="ns">project conventions</span></div>
+    </div>
+    <div class="down">↓</div>
+    <div class="node big solid"><span class="nk">React + TypeScript</span><span class="ns">per-component files</span></div>
+    <span class="cap">code track</span>
+  </div>
+
+  <!-- 4 · PLUGIN PIPELINE -->
+  <div class="eyebrow newpage" id="p">The design track</div>
+  <h2>The Figma plugin pipeline</h2>
+  <p>The Dev Mode MCP is <b>read-only</b> for canvas content, and the Figma REST API has no
+  endpoint that creates frames. The only way to write a design programmatically is the
+  <b>Figma Plugin API</b> — so Cosmo reads and writes real components through three small,
+  auditable plugins.</p>
+  <div class="diagram avoid">
+    <div class="chain c2">
+      <div class="node"><span class="nk">① key-extractor</span><span class="ns">runs in the published library → exports every name → key</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="nk">② key-test</span><span class="ns">runs in the target file → confirms keys are published &amp; enabled</span></div>
+    </div>
+    <div class="down">↓</div>
+    <div class="node big solid"><span class="nk">③ build plugin</span><span class="ns">assembles frames from real instances</span></div>
+  </div>
+  <h3>How the build plugin places a real component</h3>
+  <pre><span class="k">const</span> comp = <span class="k">await</span> figma.<span class="f">importComponentByKeyAsync</span>(key);
+<span class="k">const</span> instance = comp.<span class="f">createInstance</span>();
+frame.<span class="f">appendChild</span>(instance);
+instance.layoutSizingHorizontal = <span class="s">"FILL"</span>;   <span class="c">// size top-down, after append</span></pre>
+  <div class="call ok avoid"><span class="t">Fallback, clearly labelled</span> When a component is genuinely unpublished or missing, the
+  build plugin emits a <b>styled primitive</b> and labels it as such — it never fabricates a key.</div>
+
+  <!-- 5 · FOUR PHASES -->
+  <div class="eyebrow" id="f">The workflow</div>
+  <h2>Four phases, with gates</h2>
+  <p>A pattern-match check (Phase 0) can shortcut well-known UX patterns. Otherwise the request
+  flows through four gated phases — each one waits for your <code>approved</code>.</p>
+  <div class="steps">
+    <div class="step"><div class="num">01</div><h4>Intake</h4><p>Turn the prompt / PRD / Figma URL into a structured spec: purpose, users, screens, data, edge cases, fidelity.</p></div>
+    <div class="step"><div class="num">02</div><h4>Design</h4><p>Plan a verified component inventory, then generate a build plugin that writes the frames into Figma.</p></div>
+    <div class="step"><div class="num">03</div><h4>Audit</h4><p>Re-read the frames and produce a severity-graded report across five compliance domains.</p></div>
+    <div class="step"><div class="num">04</div><h4>Code</h4><p>Map each frame to a component tree and emit React/TypeScript per component, mapped to verified APIs.</p></div>
+  </div>
+
+  <!-- 6 · MCP SETUP -->
+  <div class="eyebrow newpage" id="m">Setup</div>
+  <h2>Wiring the MCP servers</h2>
+  <p>Cosmo uses two HTTP MCP servers, registered in your workspace at <code>.vscode/mcp.json</code>.</p>
+  <pre><span class="c">// .vscode/mcp.json</span>
+{
+  <span class="s">"servers"</span>: {
+    <span class="s">"figma-desktop"</span>: { <span class="s">"type"</span>: <span class="s">"http"</span>, <span class="s">"url"</span>: <span class="s">"http://127.0.0.1:3845/mcp"</span> },
+    <span class="s">"component-docs"</span>: { <span class="s">"type"</span>: <span class="s">"http"</span>, <span class="s">"url"</span>: <span class="s">"https://&lt;your-docs-mcp-host&gt;/mcp/server/"</span> }
+  }
+}</pre>
+  <table class="avoid">
+    <thead><tr><th>Server</th><th>Role</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><b>figma-desktop</b></td><td>Reads the canvas; the target the build plugin writes into</td><td>Figma desktop → Preferences → <b>Enable Dev Mode MCP Server</b> (runs at <code>127.0.0.1:3845</code>).</td></tr>
+      <tr><td><b>component-docs</b></td><td>Component props / tokens, and the source of the generated code</td><td>HTTP server; may be internal. Start it in <b>MCP: List Servers</b>.</td></tr>
+    </tbody>
+  </table>
+  <div class="call warn avoid"><span class="t">The most common gotcha</span> The server name in <code>mcp.json</code> <b>must match</b> the name in
+  the agent's <code>tools</code> allowlist. A mismatch is the #1 reason “the MCP is running but the agent can't see it.”</div>
+
+  <!-- 7 · STANDARDS -->
+  <div class="eyebrow" id="s">Quality</div>
+  <h2>Standards baked in, not bolted on</h2>
+  <p>Compliance is applied at design time <i>and</i> code-generation time — not just at the audit step.</p>
+  <div class="grid g2">
+    <div class="card avoid"><span class="k">WCAG 2.2 AA</span><span class="s">Contrast, focus order, keyboard operability, accessible names, live regions, target size — annotated in Figma and enforced in code.</span></div>
+    <div class="card avoid"><span class="k">Responsible AI</span><span class="s">AI identity marks, disclaimers, feedback affordances, and consent-first behaviour on any AI output.</span></div>
+    <div class="card avoid"><span class="k">Content design</span><span class="s">Sentence case, plain language, and the error formula — <i>what happened + why + how to fix</i>.</span></div>
+    <div class="card avoid"><span class="k">Design tokens</span><span class="s">Spacing, colour, typography, elevation, and radius bound to tokens — never hardcoded hex or px.</span></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="eyebrow">By the numbers</div>
+  <h2>The catalog &amp; the discipline</h2>
+  <div class="stats">
+    <div class="stat"><div class="big">235 sets</div><span class="cap">component sets extracted, 3,634 variants</span></div>
+    <div class="stat"><div class="big">read-only</div><span class="cap">Dev Mode MCP — plugins do the writing</span></div>
+    <div class="stat"><div class="big">top-down</div><span class="cap">FILL sizing after append keeps layouts stable</span></div>
+    <div class="stat"><div class="big">idempotent</div><span class="cap">builds remove prior frames — no duplicates</span></div>
+  </div>
+
+  <p class="closing">Cosmo keeps the whole pipeline honest: real components resolved from live
+  sources, a design authored by plugins, code generated from verified APIs, and a human gate
+  between every step.</p>
+
+  <div class="chips">
+    <span class="chip">VS Code Agent</span><span class="chip">Figma Plugin API</span><span class="chip">MCP</span>
+    <span class="chip">React + TypeScript</span><span class="chip">WCAG 2.2 AA</span><span class="chip">Design Tokens</span>
+  </div>
+  <div class="foot">Cosmo · Design-to-Code Agent — Technical Architecture · 2026</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "id": "fluent-agent",
+  "displayName": "Fluent Agent MCP",
+  "description": "Live component documentation for SFE (@sfe/react-*), Fluent Copilot (@fluentui/react-copilot), and Fluent UI v9 (@fluentui/react-components). Use `ask_fluent_agent(<catalog>, <question>)` where <catalog> is one of `sfe`, `react-v9`, `react-copilot`.",
+  "transport": "stdio",
+  "command": "fluent-agent-mcp",
+  "args": [],
+  "env": {
+    "FLUENT_AGENT_ENDPOINT": "${FLUENT_AGENT_ENDPOINT:-https://internal.microsoft.com/fluent-agent-mcp}"
+  },
+  "tools": [
+    {
+      "name": "ask_fluent_agent",
+      "description": "Query the Fluent Agent for live component docs. Args: (catalog: 'sfe' | 'react-v9' | 'react-copilot', question: string). Prompt template: 'For {Component}: when to use, when NOT to use, do\\'s, don\\'ts, required/optional props and slots, default values, supported values, and a code example.'"
+    }
+  ],
+  "notes": [
+    "This is a template — replace `command` and `env` with the values your team uses to invoke the Fluent Agent MCP server.",
+    "Cosmo retries each MCP call once on transient failure, then falls back to the local `using-sfe-components` catalog and clearly marks the uncertainty."
+  ]
+}

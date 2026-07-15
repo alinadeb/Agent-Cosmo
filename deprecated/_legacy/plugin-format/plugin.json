@@ -1,0 +1,55 @@
+{
+  "name": "cosmo",
+  "version": "0.1.0",
+  "displayName": "Cosmo — Design-to-Code Agent",
+  "description": "AI agent that turns a prompt, PRD, or Figma file into an SFE-compliant Figma design and then production-ready React/TypeScript code, with human review gates at every step.",
+  "authors": [
+    { "name": "alinadeb" }
+  ],
+  "tags": [
+    "sfe",
+    "security-fluent-extension",
+    "figma",
+    "design-to-code",
+    "prototyping",
+    "react",
+    "typescript",
+    "accessibility",
+    "responsible-ai",
+    "design-system"
+  ],
+  "agents": [
+    {
+      "id": "cosmo",
+      "path": "agents/cosmo.md",
+      "description": "Design → Audit → Code workflow with human-in-the-loop review at every gate."
+    }
+  ],
+  "skills": [
+    { "id": "ingesting-prd-and-figma", "path": "skills/ingesting-prd-and-figma/SKILL.md", "autoLoad": false },
+    { "id": "generating-figma-designs", "path": "skills/generating-figma-designs/SKILL.md", "autoLoad": false },
+    { "id": "auditing-sfe-designs", "path": "skills/auditing-sfe-designs/SKILL.md", "autoLoad": false },
+    { "id": "design-to-react-handoff", "path": "skills/design-to-react-handoff/SKILL.md", "autoLoad": false },
+    { "id": "using-sfe-components", "path": "skills/using-sfe-components/SKILL.md", "autoLoad": true },
+    { "id": "sfe-ux-standards", "path": "skills/sfe-ux-standards/SKILL.md", "autoLoad": true },
+    { "id": "pattern-agent-setup", "path": "skills/pattern-agent-setup/SKILL.md", "autoLoad": false },
+    { "id": "pattern-agent-fre", "path": "skills/pattern-agent-fre/SKILL.md", "autoLoad": false },
+    { "id": "pattern-agent-home-header", "path": "skills/pattern-agent-home-header/SKILL.md", "autoLoad": false },
+    { "id": "pattern-agent-management", "path": "skills/pattern-agent-management/SKILL.md", "autoLoad": false },
+    { "id": "pattern-agent-output-card", "path": "skills/pattern-agent-output-card/SKILL.md", "autoLoad": false },
+    { "id": "pattern-agent-performance-card", "path": "skills/pattern-agent-performance-card/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-prompt-ribbon", "path": "skills/pattern-copilot-prompt-ribbon/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-entry-points", "path": "skills/pattern-copilot-entry-points/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-inline-output-card", "path": "skills/pattern-copilot-inline-output-card/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-auto-invoke", "path": "skills/pattern-copilot-auto-invoke/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-feedback", "path": "skills/pattern-copilot-feedback/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-handoff", "path": "skills/pattern-copilot-handoff/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-onboarding-and-upsell", "path": "skills/pattern-copilot-onboarding-and-upsell/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-fre", "path": "skills/pattern-copilot-fre/SKILL.md", "autoLoad": false },
+    { "id": "pattern-copilot-home-header", "path": "skills/pattern-copilot-home-header/SKILL.md", "autoLoad": false }
+  ],
+  "mcpServers": [
+    { "id": "fluent-agent", "path": "mcp/fluent-agent.json" },
+    { "id": "figma", "path": "mcp/figma.json" }
+  ]
+}

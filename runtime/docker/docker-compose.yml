@@ -1,0 +1,25 @@
+version: "3.9"
+
+# Convenience wrapper. Use from the plugin root:
+#   docker compose -f runtime/docker/docker-compose.yml up
+#
+# Or if you want to build without compose:
+#   docker build -f runtime/docker/Dockerfile -t cosmo:latest .
+
+services:
+  cosmo:
+    build:
+      context: ../..
+      dockerfile: runtime/docker/Dockerfile
+    image: cosmo:latest
+    stdin_open: true
+    tty: true
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
+      - ANTHROPIC_MAX_TOKENS=${ANTHROPIC_MAX_TOKENS:-8192}
+      - FIGMA_MCP_ENABLED=${FIGMA_MCP_ENABLED:-true}
+      - FIGMA_MCP_COMMAND=${FIGMA_MCP_COMMAND:-npx}
+      - FIGMA_MCP_ARGS=${FIGMA_MCP_ARGS:--y,figma-developer-mcp}
+      - FIGMA_ACCESS_TOKEN=${FIGMA_ACCESS_TOKEN}
+      - COSMO_LOG_TOKENS=${COSMO_LOG_TOKENS:-false}

@@ -1,0 +1,8 @@
+{
+  "name": "Cosmo — Triage Dashboard",
+  "id": "cosmo-triage-dashboard",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page"
+}

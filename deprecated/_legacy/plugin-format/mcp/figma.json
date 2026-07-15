@@ -1,0 +1,37 @@
+{
+  "id": "figma",
+  "displayName": "Figma MCP",
+  "description": "Read and write Figma files. Cosmo uses this in Phase 1 (ingest existing frames), Phase 2 (generate/update frames), and Phase 3 (audit).",
+  "transport": "stdio",
+  "command": "figma-mcp",
+  "args": [],
+  "env": {
+    "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}",
+    "FIGMA_TEAM_ID": "${FIGMA_TEAM_ID}"
+  },
+  "tools": [
+    { "name": "get_file", "description": "Get file metadata by fileKey. Args: (fileKey: string)." },
+    { "name": "get_frames", "description": "List frames on a page. Args: (fileKey: string, pageId?: string)." },
+    { "name": "get_node", "description": "Get a node by id. Args: (fileKey: string, nodeId: string)." },
+    { "name": "get_text_content", "description": "Extract all text nodes under a subtree. Args: (fileKey: string, nodeId: string)." },
+    { "name": "get_components", "description": "List component instances in a subtree with mainComponent key/name. Args: (fileKey: string, nodeId?: string)." },
+    { "name": "get_variables", "description": "List variable/style bindings on a node. Args: (fileKey: string, nodeId: string)." },
+    { "name": "create_frame", "description": "Create a frame. Args: (fileKey: string, pageId: string, name: string, size: {w:number,h:number})." },
+    { "name": "insert_component", "description": "Insert a component instance from the SFE library. Args: (fileKey: string, parentId: string, libraryKey: string, componentKey: string, props?: object)." },
+    { "name": "set_variable", "description": "Bind a variable/style to a node. Args: (fileKey: string, nodeId: string, property: string, variableId: string)." },
+    { "name": "add_annotation", "description": "Add a design-note annotation on a node (used for aria-label, focus order, etc.). Args: (fileKey: string, nodeId: string, text: string)." }
+  ],
+  "safety": {
+    "requiresWriteConfirmation": true,
+    "readOnlyByDefault": false,
+    "notes": [
+      "Cosmo asks the user before writing to a Figma file the first time in a session.",
+      "Cosmo never writes during Phase 3 (audit) — audit is read-only. Writes only happen in Phase 2 and when the user says `apply fixes`.",
+      "Never log or echo the FIGMA_ACCESS_TOKEN. If the user pastes one, refuse and ask them to configure it in MCP env."
+    ]
+  },
+  "notes": [
+    "This is a template — replace `command` and env variable resolution with the values used by your Figma MCP implementation.",
+    "Cosmo retries each MCP call once on transient failure, then falls back to describe-only mode (Phase 2) or image-audit mode (Phase 3)."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Cosmo — SFE Key Test",
+  "id": "cosmo-sfe-key-test",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"]
+}
